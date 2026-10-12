@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#10251f">
+<title>Paata — Telugu Lyrics Finder</title>
+<style>
+:root{--bg:#091511;--panel:#13261e;--line:#2c4a3c;--mint:#a6f2c5;--text:#f3fff7;--muted:#aac2b4}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top right,#1d4936 0,transparent 42%),var(--bg);color:var(--text);font:16px/1.5 system-ui,-apple-system,sans-serif}
+main{max-width:720px;margin:auto;padding:18px 14px 42px}.top{display:flex;align-items:center;justify-content:space-between;gap:10px}.brand{display:flex;gap:10px;align-items:center;font-size:24px;font-weight:900}.logo{width:43px;height:43px;display:grid;place-items:center;background:var(--mint);color:#10251f;border-radius:14px;font-size:25px}.pill{border:1px solid var(--line);border-radius:99px;padding:6px 10px;font-size:10px;letter-spacing:1px;color:var(--mint);font-weight:800}
+.hero{padding:30px 2px 20px}.hero h1{font-size:clamp(38px,10vw,58px);line-height:1;letter-spacing:-2px;margin:0 0 13px}.hero h1 span{color:var(--mint)}p{color:var(--muted)}.panel{background:#13261eeF;border:1px solid var(--line);border-radius:22px;padding:17px;margin-top:13px}.label{display:block;font-weight:800;font-size:13px;margin-bottom:7px}input,textarea{width:100%;background:#08140f;color:var(--text);border:1px solid #3c5b49;border-radius:14px;padding:14px;font:inherit}input::placeholder,textarea::placeholder{color:#7f9c8c}.btn{border:0;border-radius:13px;padding:13px 14px;min-height:48px;background:var(--mint);color:#10251f;font-weight:850;font:inherit;cursor:pointer}.btn.secondary{background:#21392d;color:var(--text);border:1px solid #3b5b48}.actions{display:flex;gap:9px;margin-top:10px}.actions>*{flex:1}.hint{font-size:12px;margin-bottom:0}.status{padding:12px 13px;border-radius:13px;background:#0a1811;border:1px solid #2a4637;color:var(--muted);font-size:13px;margin-top:12px}.section{font-size:20px;margin:25px 2px 8px}.result{display:flex;gap:11px;align-items:center;padding:13px;border:1px solid var(--line);border-radius:15px;background:#13261e;color:var(--text);text-decoration:none;margin-top:9px}.icon{flex:0 0 40px;height:40px;display:grid;place-items:center;border-radius:12px;background:#234535;font-size:19px}.result strong{display:block;font-size:14px}.result small{display:block;color:var(--muted);font-size:12px}.go{margin-left:auto;color:var(--mint);font-weight:800;font-size:12px;white-space:nowrap}.list{display:grid;gap:8px}.song{display:block;width:100%;text-align:left;border:1px solid var(--line);border-radius:14px;padding:13px;background:#13261e;color:var(--text)}.song strong{display:block}.song small{color:var(--muted)}.lyrics{white-space:pre-wrap;overflow-wrap:anywhere;font-size:20px;line-height:1.9}.hidden{display:none}.foot{text-align:center;color:#799888;font-size:11px;margin-top:28px}@media(max-width:450px){main{padding:13px 10px 32px}.panel{padding:14px}.actions{flex-direction:column}.pill{font-size:9px}}
+</style></head>
+<body><main>
+<header class="top"><div class="brand"><div class="logo">♫</div>paata</div><div class="pill">TELUGU LYRICS FINDER</div></header>
+<section class="hero"><h1>Find the song.<br><span>Find the words.</span></h1><p>A focused Telugu lyrics finder. Search song titles, movie names, singers, or a lyric line. Paata does not show a YouTube video list.</p></section>
+<section class="panel">
+<label class="label" for="query">Song title or words you remember</label>
+<input id="query" placeholder="Type in Telugu or English…" autocomplete="off">
+<div class="actions"><button class="btn" id="search">Find lyrics</button><button class="btn secondary" id="voice">🎙 Voice search</button></div>
+<div class="status" id="status">Enter a song and tap Find lyrics. Search results open in your browser because Google blocks its live results from being embedded reliably inside this page.</div>
+<p class="hint">Search terms exclude YouTube and common video sites. Search providers may not obey every exclusion perfectly.</p>
+</section>
+<h2 class="section">Lyrics searches</h2>
+<div id="results"></div>
+<section class="panel"><h2 style="margin:0 0 5px">My saved lyrics</h2><p class="hint">Save lyrics you wrote or are allowed to use. They stay in this browser on this device.</p>
+<div id="saved" class="list" style="margin-top:12px"></div>
+<h3 style="margin:20px 0 10px">Add lyrics to your library</h3>
+<label class="label" for="title">Song title</label><input id="title" placeholder="Song title">
+<label class="label" for="words" style="margin-top:10px">Lyrics</label><textarea id="words" rows="5" placeholder="Paste lyrics you are allowed to store…"></textarea>
+<div class="actions"><button class="btn" id="save">Save lyrics</button><button class="btn secondary" id="clear">Clear</button></div><p class="hint" id="saveStatus"></p>
+<section id="reader" class="panel hidden"><h2 id="readerTitle"></h2><div id="readerWords" class="lyrics"></div><div class="actions"><button class="btn secondary" id="read">🔊 Read aloud</button><button class="btn" id="sing">Line-by-line mode</button></div><div id="singbox" class="hidden"><div id="line" class="lyrics"></div><div class="actions"><button class="btn secondary" id="prev">Back</button><button class="btn" id="next">Next line</button></div></div></section>
+<footer class="foot">Paata · Free browser app · Lyrics search only</footer>
+</main>
+<script>
+const $=id=>document.getElementById(id),KEY='paata_saved_lyrics_v2';let active=null,lines=[],lineIndex=0;
+function getSaved(){try{return JSON.parse(localStorage.getItem(KEY)||'[]')}catch(e){return []}}
+function setSaved(a){try{localStorage.setItem(KEY,JSON.stringify(a));return true}catch(e){return false}}
+function googleSearch(query,site=''){let q=(site?'site:'+site+' ':'')+query+' Telugu lyrics OR పాటల సాహిత్యం -site:youtube.com -site:m.youtube.com -site:youtu.be -site:youtube-nocookie.com -site:music.youtube.com -site:facebook.com/watch -site:tiktok.com -video -videos';return 'https://www.google.com/search?q='+encodeURIComponent(q)}
+function addLink(title,detail,url){let a=document.createElement('a');a.className='result';a.href=url;a.target='_blank';a.rel='noopener noreferrer';a.innerHTML='<span class="icon">📄</span><span><strong></strong><small></small></span><span class="go">Search ↗</span>';a.querySelector('strong').textContent=title;a.querySelector('small').textContent=detail;$('results').appendChild(a)}
+function search(){let q=$('query').value.trim();if(!q){$('status').textContent='Type a song title or lyric words first.';$('query').focus();return}
+$('results').innerHTML='';$('status').textContent='Search links are ready. Tap a lyrics search below. These open filtered Google results in a new tab; this page cannot reliably embed Google results directly.';
+addLink('Search all Telugu lyrics pages', 'Broad search · excludes common video sites',googleSearch(q));
+addLink('Search TeluguLyrics', 'Search this site only',googleSearch(q,'telugulyrics.com'));
+addLink('Search LyricsTape', 'Search this site only',googleSearch(q,'lyricstape.com'));
+addLink('Search iLyricsLab', 'Search this site only',googleSearch(q,'ilyricslab.com'));
+addLink('Search Lyricsing', 'Search this site only',googleSearch(q,'lyricsing.com'));
+let matches=getSaved().filter(x=>(x.title+' '+x.words).toLocaleLowerCase().includes(q.toLocaleLowerCase()));if(matches.length){let h=document.createElement('div');h.className='status';h.textContent='Matches in your saved library';$('results').prepend(h);matches.forEach(x=>{$('results').prepend(savedButton(x))})}}
+function savedButton(x){let b=document.createElement('button');b.className='song';b.innerHTML='<strong></strong><small>Saved locally · tap to read</small>';b.querySelector('strong').textContent=x.title;b.onclick=()=>show(x);return b}
+function renderSaved(){let box=$('saved');box.innerHTML='';let a=getSaved();if(!a.length){box.textContent='No saved lyrics yet.';box.className='status';return}box.className='list';a.forEach(x=>box.appendChild(savedButton(x)))}
+function show(x){active=x;$('readerTitle').textContent=x.title;$('readerWords').textContent=x.words;$('reader').classList.remove('hidden');$('singbox').classList.add('hidden');$('reader').scrollIntoView({behavior:'smooth',block:'start'})}
+$('search').onclick=search;$('query').addEventListener('keydown',e=>{if(e.key==='Enter')search()});
+$('voice').onclick=()=>{let R=window.SpeechRecognition||window.webkitSpeechRecognition;if(!R){$('status').textContent='Voice search is not supported in this browser. Type the song title instead.';return}let r=new R();r.lang='te-IN';r.onresult=e=>{$('query').value=e.results[0][0].transcript;search()};r.onerror=()=>{$('status').textContent='Voice search failed. Allow microphone access or type instead.'};r.start();$('status').textContent='Listening…'};
+$('save').onclick=()=>{let title=$('title').value.trim(),words=$('words').value.trim();if(!title||!words){$('saveStatus').textContent='Enter both song title and lyrics.';return}let a=getSaved(),i=a.findIndex(x=>x.title.toLowerCase()===title.toLowerCase()),x={title,words};if(i>=0)a[i]=x;else a.unshift(x);if(!setSaved(a)){$('saveStatus').textContent='Could not save. Browser storage may be unavailable.';return}$('saveStatus').textContent='Saved successfully.';renderSaved();show(x)};
+$('clear').onclick=()=>{$('title').value='';$('words').value='';$('saveStatus').textContent=''};
+function paint(){if(!lines.length)return;lineIndex=Math.max(0,Math.min(lineIndex,lines.length-1));$('line').textContent=lines[lineIndex];$('prev').disabled=lineIndex===0;$('next').textContent=lineIndex===lines.length-1?'Start again':'Next line'}
+$('sing').onclick=()=>{if(!active)return;lines=active.words.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);lineIndex=0;$('singbox').classList.remove('hidden');paint()};
+$('prev').onclick=()=>{lineIndex--;paint()};$('next').onclick=()=>{lineIndex=lineIndex===lines.length-1?0:lineIndex+1;paint()};
+$('read').onclick=()=>{if(!active)return;if(!window.speechSynthesis){$('saveStatus').textContent='Read aloud is not supported here.';return}speechSynthesis.cancel();let u=new SpeechSynthesisUtterance(active.words);u.lang='te-IN';u.rate=.85;speechSynthesis.speak(u)};
+renderSaved();
+</script></body></html>
